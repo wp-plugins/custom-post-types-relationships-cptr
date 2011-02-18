@@ -6,9 +6,9 @@ Author URI: http://www.cssigniter.com/
 Author: The CSSigniter Team
 Tags: related posts, custom related posts, custom relations, post relationships, related, post
 Requires at least: 2.9.0
-Tested up to: 3.1
-Stable tag: 1.0
-Version: 1.0 
+Tested up to: 3.0.3
+Stable tag: 2.1
+Version: 2.1
 
 This plugin will let you create custom post relationships among posts, pages and custom post types.
 
@@ -25,7 +25,7 @@ and the results are automatic. With CPTR you get total control as you can manual
 
 == Frequently Asked Questions ==
 
-= How do i display the related posts then? =
+= How do I display the related posts then? =
 
 Check http://www.cssigniter.com/ignite/custom-post-relationships/ for info on how to display your related posts.
 
@@ -36,5 +36,16 @@ Check http://www.cssigniter.com/ignite/custom-post-relationships/ for info on ho
 
 == Changelog ==
 
+= 2.1 = 
+* Version number changed to match the plugin repo.
+* Fixed a bug where the last related post was the current for $post after the plugin run.
+* Thumbnail now links to the post too.
+* The cpr_populate() function now always returns an array, even if empty.
+
 = 1.0 = 
 * Initial Release
+
+== Upgrade Notice ==
+
+= 2.1 =
+This version corrects on some expected functionality.

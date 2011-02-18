@@ -29,7 +29,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 
 if (!defined('CPR_VERSION'))
-	define('CPR_VERSION', '1.01');
+	define('CPR_VERSION', '2.1');
 
 if (!defined('CI_CPR_PLUGIN_OPTIONS'))
 	define('CI_CPR_PLUGIN_OPTIONS', 'ci-cpr-plugin');
@@ -197,8 +197,8 @@ function cpr_populate($id) {
 			$post = get_post($related);
 			$related_posts[] = $post;
 		}
-		return $related_posts; 
 	}
+	return $related_posts; 
 }
 
 function cptr($echo=null, $limit=null, $excerpt=null, $words=null, $thumb=null, $width=null, $height=null)
@@ -223,6 +223,8 @@ function cpr_show(	$echo=true,
 					$height=CPR_DEFAULT_THUMB_HEIGHT) {
 	global $post;
 	global $wpdb;
+
+	$old_post = $post;
 
 	$text = "";
 
@@ -249,7 +251,7 @@ function cpr_show(	$echo=true,
 				$text .= '<h4><a href="'.get_permalink($post->ID).'">'.get_the_title().'</a></h4>';
 				if (current_theme_supports('post-thumbnails') and $thumb==true and has_post_thumbnail($post->ID))
 				{
-					$thumbnail = get_the_post_thumbnail($post->ID, array($width, $height));
+					$thumbnail = '<a href="'.get_permalink($post->ID).'">' . get_the_post_thumbnail($post->ID, array($width, $height)) . '</a>';
 					$text .= $thumbnail;
 				}
 				
@@ -265,6 +267,9 @@ function cpr_show(	$echo=true,
 		}
 		
 	}
+	
+	$post = $old_post;
+	setup_postdata($post);
 	
 	if ($echo)
 		echo $text;
