@@ -36,6 +36,10 @@ Check http://www.cssigniter.com/ignite/custom-post-relationships/ for info on ho
 
 == Changelog ==
 
+= 2.2 = 
+* All functions/pages/settings etc that included the acronym CPT have been renamed to CPTR. Functions have been deprecated and will be available until v3.0.
+* Implemented automatic upgrade of settings etc for earlier version users.
+
 = 2.1 = 
 * Version number changed to match the plugin repo.
 * Fixed a bug where the last related post was the current for $post after the plugin run.
