@@ -6,9 +6,9 @@ Author URI: http://www.cssigniter.com/
 Author: The CSSigniter Team
 Tags: related posts, custom related posts, custom relations, post relationships, related, post
 Requires at least: 2.9.0
-Tested up to: 3.0.3
-Stable tag: 2.1
-Version: 2.1
+Tested up to: 3.2.1
+Stable tag: 2.2
+Version: 2.2
 
 This plugin will let you create custom post relationships among posts, pages and custom post types.
 

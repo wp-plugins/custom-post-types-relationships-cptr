@@ -19,13 +19,13 @@ jQuery(document).ready(function($) {
 	})
 	
 	// fetch posts per category selected
-	$('.cpr_button').click(function(){ 
+	$('.cptr_button').click(function(){ 
 			
 		// make the call (Yo, Wazzzaaaaaa?)
 		$.ajax({
 			type: "post",
 			url: AjaxHandler.ajaxurl,
-			data: { action: 'cpr-cats', cpr_post_type: $('#posttype').val(), postID: $('#h_pid').val(), howMany: $('#howmany').val(), orderBy: $('#orderby').val(), orderIn: $('#orderin').val()  },
+			data: { action: 'cptr-cats', cptr_post_type: $('#posttype').val(), postID: $('#h_pid').val(), howMany: $('#howmany').val(), orderBy: $('#orderby').val(), orderIn: $('#orderin').val()  },
 			beforeSend: function() {$("#available-posts").html('Loading...');}, 
 			success: function(response){ 
 				//dump the list with post from the category selected
