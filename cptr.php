@@ -3,7 +3,7 @@
 Plugin Name: Custom Post Types Relationships (CPTR)
 Plugin URI: http://www.cssigniter.com/ignite/custom-post-types-relationships/
 Description: An easy way to create relationships between posts, pages, and custom post types in Wordpress
-Version: 2.2
+Version: 2.3
 Author: The CSSigniter Team
 Author URI: http://www.cssigniter.com/
 
@@ -32,7 +32,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 
 if (!defined('CPTR_VERSION'))
-	define('CPTR_VERSION', '2.2');
+	define('CPTR_VERSION', '2.3');
 
 if (!defined('CI_CPTR_PLUGIN_OPTIONS'))
 	define('CI_CPTR_PLUGIN_OPTIONS', 'ci_cptr_plugin');
@@ -283,9 +283,13 @@ function cptr_show(	$echo=true,
 	setup_postdata($post);
 	
 	if ($echo)
+	{
 		echo $text;
+	}
 	else
+	{
 		return $text;
+	}
 }
 
 // [cptr limit=0 excerpt=0 etc... ]
@@ -298,7 +302,7 @@ function ci_cptr_short($atts) {
 	}
 	else
 	{
-		$echo = true;
+		$echo = false;
 	}
 	
 	$options = get_option(CI_CPTR_PLUGIN_OPTIONS);
@@ -405,14 +409,14 @@ function _cptr_do_upgrade($version)
 // Each upgrade function should call its immediate predecessor. That way we can upgrade from v1 to the latest version.
 
 
-// Example future function that upgrades to 2.3
+// Example future function that upgrades to 2.4
 /*
-function _cptr_upgrade_to_2_3($version)
+function _cptr_upgrade_to_2_4($version)
 {
 	// Bring the installation on step behind.
 	_cptr_upgrade_to_2_2($version);
 	
-	// Do specific v2.2 to v2.3 upgrade actions.
+	// Do specific v2.2 to v2.4 upgrade actions.
 }
 */
 
