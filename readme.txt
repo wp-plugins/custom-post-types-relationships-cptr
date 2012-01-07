@@ -6,9 +6,9 @@ Author URI: http://www.cssigniter.com/
 Author: The CSSigniter Team
 Tags: related posts, custom related posts, custom relations, post relationships, related, post
 Requires at least: 2.9.0
-Tested up to: 3.2.1
-Stable tag: 2.3
-Version: 2.3
+Tested up to: 3.3.1
+Stable tag: 2.4
+Version: 2.4
 
 This plugin will let you create custom post relationships among posts, pages and custom post types.
 
@@ -36,6 +36,9 @@ Check http://www.cssigniter.com/ignite/custom-post-relationships/ for info on ho
 
 == Changelog ==
 
+= 2.4 = 
+* Fixed a bug where the normal post object was not restored after the execution of cptr_category_selector(), when selecting related posts. (Thanks Pascal Rosin).
+
 = 2.3 = 
 * Fixed a bug where relationships were inappropriately outputted when using the shortcode.
 
@@ -54,5 +57,5 @@ Check http://www.cssigniter.com/ignite/custom-post-relationships/ for info on ho
 
 == Upgrade Notice ==
 
-= 2.3 =
-This version corrects a minor bug from v2.2.
+= 2.4 =
+This version corrects a major bug from v2.3.

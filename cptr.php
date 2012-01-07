@@ -3,7 +3,7 @@
 Plugin Name: Custom Post Types Relationships (CPTR)
 Plugin URI: http://www.cssigniter.com/ignite/custom-post-types-relationships/
 Description: An easy way to create relationships between posts, pages, and custom post types in Wordpress
-Version: 2.3
+Version: 2.4
 Author: The CSSigniter Team
 Author URI: http://www.cssigniter.com/
 
@@ -32,7 +32,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 
 if (!defined('CPTR_VERSION'))
-	define('CPTR_VERSION', '2.3');
+	define('CPTR_VERSION', '2.4');
 
 if (!defined('CI_CPTR_PLUGIN_OPTIONS'))
 	define('CI_CPTR_PLUGIN_OPTIONS', 'ci_cptr_plugin');
@@ -85,7 +85,7 @@ function cptr_box() {
 
 function cptr_category_selector() {
 	
-	global $post_ID, $post;
+	global $post_ID;
 
 	$cptr_post_types = _cptr_get_post_types();
 	
@@ -389,39 +389,35 @@ if ( $cptr_installed_version === FALSE or $cptr_installed_version != CPTR_VERSIO
 
 function _cptr_do_upgrade($version)
 {
-	if ( $version===FALSE )
-	{
-		// Call only the latest upgrade function.
-		// Each upgrade function calls its predecessor, so everything gets updated.
-		_cptr_upgrade_to_2_2($version);		
-		
-		// We should be up to date now.
-		// Register the latest CPTR version number.
-		update_option(CI_CPTR_PLUGIN_INSTALLED, CPTR_VERSION);
-	}
-	
+	$version = _cptr_upgrade_to_2_2($version);		
+	$version = _cptr_upgrade_to_2_4($version);
+	update_option(CI_CPTR_PLUGIN_INSTALLED, CPTR_VERSION);
 }
 
 //
 // Upgrade Functions
 //
 
-// Each upgrade function should call its immediate predecessor. That way we can upgrade from v1 to the latest version.
-
-
-// Example future function that upgrades to 2.4
-/*
 function _cptr_upgrade_to_2_4($version)
 {
-	// Bring the installation on step behind.
-	_cptr_upgrade_to_2_2($version);
-	
-	// Do specific v2.2 to v2.4 upgrade actions.
+	if ($version == '2.2' or $version == '2.3')
+	{
+		// No DB changes in this update
+		return '2.4';
+	}
+	else
+	{
+		return $version;
+	}
 }
-*/
 
 function _cptr_upgrade_to_2_2($version)
 {
+	if ( $version!==FALSE )
+	{
+		return $version;
+	}
+
 	// Update the plugin options
 	$opt_name = defined(CI_CPR_PLUGIN_OPTIONS) ? CI_CPR_PLUGIN_OPTIONS : 'ci-cpr-plugin';
 	$options = get_option($opt_name);
@@ -434,7 +430,9 @@ function _cptr_upgrade_to_2_2($version)
 	// Update the posts
 	$meta_name = defined(CI_CPR_POST_RELATED) ? CI_CPR_POST_RELATED : 'cpr_related';
 	global $wpdb;	
-	$wpdb->query($wpdb->prepare("UPDATE $wpdb->postmeta SET meta_key = '".CI_CPTR_POST_RELATED."' WHERE meta_key = '".$meta_name."'"));	
+	$wpdb->query($wpdb->prepare("UPDATE $wpdb->postmeta SET meta_key = '".CI_CPTR_POST_RELATED."' WHERE meta_key = '".$meta_name."'"));
+	
+	return '2.2';
 }
 
 add_action('admin_menu', 'cptr_box');
