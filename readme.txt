@@ -1,5 +1,5 @@
 === Custom Post Types Relationships (CPTR) ===
-Contributors: Gerasimos Tsiamalos, Anastis Sourgoutsidis
+Contributors: tsiger, anastis
 Plugin Name: Custom Post Types Relationships (CPTR)
 Plugin URI: http://www.cssigniter.com/ignite/custom-post-types-relationships/
 Author URI: http://www.cssigniter.com/
