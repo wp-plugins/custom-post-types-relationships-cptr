@@ -1,5 +1,5 @@
 === Custom Post Types Relationships (CPTR) ===
-Contributors: Gerasimos Tsiamalos, Anastis Sourgoutsidis
+Contributors: tsiger, anastis
 Plugin Name: Custom Post Types Relationships (CPTR)
 Plugin URI: http://www.cssigniter.com/ignite/custom-post-types-relationships/
 Author URI: http://www.cssigniter.com/
@@ -35,6 +35,10 @@ Check http://www.cssigniter.com/ignite/custom-post-relationships/ for info on ho
 2. The default settings panel.
 
 == Changelog ==
+
+= 2.5 = 
+* Made all text translatable.
+* Wrapped all HTML properties in double quotes instead of single.
 
 = 2.4 = 
 * Fixed a bug where the normal post object was not restored after the execution of cptr_category_selector(), when selecting related posts. (Thanks Pascal Rosin).

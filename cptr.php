@@ -30,9 +30,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // NOTE: EVERYTHING with a CPR has been renamed to CPTR. Files/functions/options using CPR have been deprecated and will be removed by v3.0
 //
 
-
 if (!defined('CPTR_VERSION'))
-	define('CPTR_VERSION', '2.4');
+	define('CPTR_VERSION', '2.5');
 
 if (!defined('CI_CPTR_PLUGIN_OPTIONS'))
 	define('CI_CPTR_PLUGIN_OPTIONS', 'ci_cptr_plugin');
@@ -52,6 +51,7 @@ define('CPTR_DEFAULT_THUMB', 0); // 0 is false, 1 is true
 define('CPTR_DEFAULT_THUMB_WIDTH', 100); 
 define('CPTR_DEFAULT_THUMB_HEIGHT', 100); 
 
+load_plugin_textdomain('cptr', false, basename(dirname(__FILE__)).'/languages');
 
 // Include deprecated file for compatibility.
 require_once('cpr.php');
@@ -60,6 +60,19 @@ require_once('panel.php');
 
 add_action('admin_menu', 'cptr_scripts_admin_styles');
 function cptr_scripts_admin_styles() {
+	global $pagenow;
+	switch($pagenow)
+	{
+		case 'post.php':
+		case 'post-new.php':
+		case 'page.php':
+		case 'page-new.php':
+			break;
+		default:
+			return;
+	}
+	
+	// Execution reaches this point only if it's one of the defined pages in the switch() above.
 	wp_enqueue_script('jquery-ui-core');
 	wp_enqueue_script('jquery-ui-sortable');		
 	wp_enqueue_style('cptr-admin-css', plugin_dir_url( __FILE__ ) . 'cptr-admin.css', true, CPTR_VERSION , 'all' );
@@ -79,7 +92,7 @@ function cptr_box() {
 	
 	foreach ($cptr_post_types as $key=>$value)
 	{
-		add_meta_box( 'post-meta-boxes', 'Custom Post Types Relationships (CPTR)', 'cptr_category_selector', $key, 'normal','default' );
+		add_meta_box( 'post-meta-boxes', __('Custom Post Types Relationships (CPTR)', 'cptr'), 'cptr_category_selector', $key, 'normal','default' );
 	}
 }
 
@@ -91,41 +104,42 @@ function cptr_category_selector() {
 	
 	?>
 	
-	<div id='cat-selector'>
-		<select id='howmany' name='howmany'>
-			<option value='10'>10</option>
-			<option value='50'>50</option>
-			<option value='100'>100</option>
-			<option value='-1'>All</option>
-		</select> posts from 
+	<div id="cat-selector">
+		<select id="howmany" name="howmany">
+			<option value="10">10</option>
+			<option value="50">50</option>
+			<option value="100">100</option>
+			<option value="-1"><?php _ex('All', 'e.g. All items from Posts ordered by Date in Descending order', 'cptr'); ?></option>
+		</select> <?php _ex('items from', 'e.g. All items from Posts ordered by Date in Descending order', 'cptr'); ?> 
 
-		<select id='posttype' name='cptr_post_type'>
+		<select id="posttype" name="cptr_post_type">
 	 	<?php foreach($cptr_post_types as $key=>$type): ?>
-			<option value="<?php echo $key; ?>">
+			<option value="<?php echo esc_attr($key); ?>">
 				<?php echo $type->labels->name; ?>
 			</option>
 		<?php endforeach; ?>
 		</select>
 		
-		ordered by 
-		<select id='orderby' name='orderby'>
-			<option value='title'>Title</option>
-			<option value='date'>Date</option>
+		<?php _ex('ordered by', 'e.g. All items from Posts ordered by Date in Descending order', 'cptr'); ?> 
+		
+		<select id="orderby" name="orderby">
+			<option value="title"><?php _ex('Title', 'e.g. All items from Posts ordered by Title in Descending order', 'cptr'); ?></option>
+			<option value="date"><?php _ex('Date', 'e.g. All items from Posts ordered by Date in Descending order', 'cptr'); ?></option>
 		</select>
-		 in 
-		<select id='orderin' name='orderin'>
-			<option value='ASC'>Ascending</option>
-			<option value='DESC'>Descending</option>
-		</select> order &nbsp;
-		&nbsp; Filter: <input type='text' id='filtered' name='filtered' />
-		<input type='hidden' id='h_pid' name='h_pid' value='<?php echo $post_ID; ?>'/>
-		<input type='button' class='cptr_button button' value='Search' />
+		<?php _ex('in', 'e.g. All items from Posts ordered by Date in Descending order', 'cptr'); ?> 
+		<select id="orderin" name="orderin">
+			<option value="ASC"><?php _ex('Ascending', 'e.g. All items from Posts ordered by Date in Ascending order', 'cptr'); ?></option>
+			<option value="DESC"><?php _ex('Descending', 'e.g. All items from Posts ordered by Date in Descending order', 'cptr'); ?></option>
+		</select> <?php _ex('order', 'e.g. All items from Posts ordered by Date in Descending order', 'cptr'); ?> &nbsp;
+		&nbsp; <?php _e('Filter:', 'cptr'); ?> <input type="text" id="filtered" name="filtered" />
+		<input type="hidden" id="h_pid" name="h_pid" value="<?php echo $post_ID; ?>" />
+		<input type="button" class="cptr_button button" value="<?php __('Search', 'cptr'); ?>" />
 	</div>
 	
 	<div class="postbox">
-		<h3>Available Posts</h3>
-		<div id="available-posts">Please select a category</div>
-		<h3>Related Posts (Drag to reorder)</h3>
+		<h3><?php _e('Available Posts', 'cptr'); ?></h3>
+		<div id="available-posts"><?php _e('Please select a category', 'cptr'); ?></div>
+		<h3><?php _e('Related Posts (Drag to reorder)', 'cptr'); ?></h3>
 		<div id="related-posts">
 			<?php
 			$relations = get_post_meta($post_ID, CI_CPTR_POST_RELATED, true);
@@ -133,11 +147,11 @@ function cptr_category_selector() {
 			if (!empty($relations)) :
 				foreach($relations as $relation) :
 					$post = get_post($relation);
-					echo "<div title='" . $post->post_title . "' class='thepost' id='post-".$post->ID ."'>
-							<a href='#' class='removeme'>Remove</a>
-							<p><strong>" . $post->post_title . "</strong></p>
-							<input type='hidden' name='reladded[]' value='" . $post->ID . "' />
-							</div>";
+					echo '<div title="' . $post->post_title . '" class="thepost" id="post-'.$post->ID .'">
+							<a href="#" class="removeme">' . __('Remove', 'cptr') . '</a>
+							<p><strong>' . $post->post_title . '</strong></p>
+							<input type="hidden" name="reladded[]" value="' . $post->ID . '" />
+							</div>';
 				endforeach;	
 			endif;
 			?>
@@ -214,15 +228,26 @@ function cptr_populate($id) {
 
 function cptr($echo=null, $limit=null, $excerpt=null, $words=null, $thumb=null, $width=null, $height=null)
 {
-	$params = array();
-	if ($echo!==null and is_bool($echo)) $params['echo']=$echo; else $params['echo']=true;
-	if ($limit!==null) 		$params['limit']=$limit;
-	if ($excerpt!==null) 	$params['excerpt']=$excerpt;
-	if ($words!==null) 		$params['words']=$words;
-	if ($thumb!==null) 		$params['thumb']=$thumb;
-	if ($width!==null) 		$params['width']=$width;
-	if ($height!==null) 	$params['height']=$height;
-	return ci_cptr_short($params);
+
+	if(!is_array($echo)):
+
+		_cptr_deprecated_parameters( __FUNCTION__, '2.5' );
+
+		$params = array();
+		if ($echo!==null and is_bool($echo)) $params['echo']=$echo; else $params['echo']=true;
+		if ($limit!==null) 		$params['limit']=$limit;
+		if ($excerpt!==null) 	$params['excerpt']=$excerpt;
+		if ($words!==null) 		$params['words']=$words;
+		if ($thumb!==null) 		$params['thumb']=$thumb;
+		if ($width!==null) 		$params['width']=$width;
+		if ($height!==null) 	$params['height']=$height;
+		return ci_cptr_short($params);
+
+	elseif(is_array($echo)):
+
+		return ci_cptr_short($echo);	
+
+	endif;
 }
 
 function cptr_show(	$echo=true, 
@@ -232,17 +257,34 @@ function cptr_show(	$echo=true,
 					$thumb=CPTR_DEFAULT_THUMB, 
 					$width=CPTR_DEFAULT_THUMB_WIDTH,
 					$height=CPTR_DEFAULT_THUMB_HEIGHT) {
-	global $post;
-	global $wpdb;
+
+	// Is it an "old" call?
+	if(!is_array($echo)):
+		_cptr_deprecated_parameters( __FUNCTION__, '2.5' );
+		return _old_cptr_show($echo, $limit, $excerpt, $words, $thumb, $width, $height);
+	endif;
+	
+	// Nope, it's a new, with the array parameter.
+
+	// Let's rename the array
+	$att = $echo;
+	unset($echo);
+
+	global $post, $wpdb;
 
 	$old_post = $post;
+
+	if( isset($att['post_id']) and intval($att['post_id']) > 0 )
+		$post_id = $att['post_id'];
+	else
+		$post_id = $post->ID;
 
 	$text = "";
 
 	$related_meta = get_post_meta($post->ID, CI_CPTR_POST_RELATED, true);
 	$related_posts = array();
 	if (!empty($related_meta)) {
-		//Get a list of post IDs
+		//Get a list of post objects
 		foreach ($related_meta as $related) {
 			$post = get_post($related);
 			$related_posts[] = $post;
@@ -292,26 +334,99 @@ function cptr_show(	$echo=true,
 	}
 }
 
+
+// This function should be removed by version 3.0
+// Don't use this function!
+function _old_cptr_show( $echo=true, 
+					$limit=CPTR_DEFAULT_LIMIT, 
+					$excerpt=CPTR_DEFAULT_EXCERPT, 
+					$words=CPTR_DEFAULT_EXCERPT_LENGTH, 
+					$thumb=CPTR_DEFAULT_THUMB, 
+					$width=CPTR_DEFAULT_THUMB_WIDTH,
+					$height=CPTR_DEFAULT_THUMB_HEIGHT,
+					$output_order=null) {
+
+	global $post, $wpdb;
+
+	$old_post = $post;
+
+	$text = "";
+
+	$related_meta = get_post_meta($post->ID, CI_CPTR_POST_RELATED, true);
+	$related_posts = array();
+	if (!empty($related_meta)) {
+		//Get a list of post objects
+		foreach ($related_meta as $related) {
+			$post = get_post($related);
+			$related_posts[] = $post;
+		}
+		
+		if(count($related_posts)>0)
+		{
+			$text .= '<ul id="cptr_related_posts">';
+			
+			$count=0;
+			foreach ($related_posts as $post)
+			{
+				setup_postdata($post);
+				if ($limit!=CPTR_DEFAULT_LIMIT and $count>=$limit)
+					break;
+				$text .= '<li class="'.($count%2==0 ? 'odd' : 'even').'">';
+				$text .= '<h4><a href="'.get_permalink($post->ID).'">'.get_the_title().'</a></h4>';
+				if (current_theme_supports('post-thumbnails') and $thumb==true and has_post_thumbnail($post->ID))
+				{
+					$thumbnail = '<a href="'.get_permalink($post->ID).'">' . get_the_post_thumbnail($post->ID, array($width, $height)) . '</a>';
+					$text .= $thumbnail;
+				}
+				
+				if ($excerpt==true)
+				{
+					$the_excerpt = _create_excerpt($post->post_content, $words);
+					$text .= '<p>' . $the_excerpt . '</p>';
+				}
+				$text .= '</li>';
+				$count++;
+			}
+			$text .= '</ul>';
+		}
+		
+	}
+	
+	$post = $old_post;
+	setup_postdata($post);
+	
+	if ($echo)
+	{
+		echo $text;
+	}
+	else
+	{
+		return $text;
+	}
+
+
+}
+
+
+
 // [cptr limit=0 excerpt=0 etc... ]
 add_shortcode('cptr', 'ci_cptr_short');
 function ci_cptr_short($atts) {
 
 	if (isset($atts['echo']))
-	{
 		$echo = $atts['echo'];
-	}
 	else
-	{
 		$echo = false;
-	}
 	
 	$options = get_option(CI_CPTR_PLUGIN_OPTIONS);
 
 	// $params will hold the default values ($options) overwritten by the values passed ($atts)
 	$params = wp_parse_args($atts, $options);
+	$params['echo'] = $echo;
 
 	// Now check the whole thing against the defaults and remove undefined attributes.
 	$p = shortcode_atts(array(
+		'echo' => true,
 		'limit' => CPTR_DEFAULT_LIMIT,
 		'excerpt' => CPTR_DEFAULT_EXCERPT,
 		'words' => CPTR_DEFAULT_EXCERPT_LENGTH,
@@ -320,7 +435,7 @@ function ci_cptr_short($atts) {
 		'height' => CPTR_DEFAULT_THUMB_HEIGHT
 	), $params);
 
-	return cptr_show($echo, $p['limit'], $p['excerpt'], $p['words'], $p['thumb'], $p['width'], $p['height']);
+	return cptr_show($p);
 }
 
 // oi! wait! where are you going? are you sure? 100%? a second thought? come on let's talk about it. oh well.
@@ -376,6 +491,12 @@ function _cptr_deprecated_function( $function, $version, $replacement=null ) {
 	}
 }
 
+function _cptr_deprecated_parameters( $function, $version ) {
+	if ( WP_DEBUG ) {
+		trigger_error( sprintf( __('The signature of the function %1$s has changed and the current usage has been <strong>deprecated</strong> since CPTR version %2$s. Please consult the documentation for up to date usage instructions.'), $function, $version ) );
+	}
+}
+
 
 
 //
@@ -390,7 +511,7 @@ if ( $cptr_installed_version === FALSE or $cptr_installed_version != CPTR_VERSIO
 function _cptr_do_upgrade($version)
 {
 	$version = _cptr_upgrade_to_2_2($version);		
-	$version = _cptr_upgrade_to_2_4($version);
+	$version = _cptr_upgrade_to_2_5($version);
 	update_option(CI_CPTR_PLUGIN_INSTALLED, CPTR_VERSION);
 }
 
@@ -398,12 +519,12 @@ function _cptr_do_upgrade($version)
 // Upgrade Functions
 //
 
-function _cptr_upgrade_to_2_4($version)
+function _cptr_upgrade_to_2_5($version)
 {
-	if ($version == '2.2' or $version == '2.3')
+	if ($version == '2.2' or $version == '2.3' or $version == '2.4')
 	{
 		// No DB changes in this update
-		return '2.4';
+		return '2.5';
 	}
 	else
 	{
