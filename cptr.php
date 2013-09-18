@@ -81,15 +81,16 @@ function cptr_scripts_admin_styles() {
 	// Execution reaches this point only if it's one of the defined pages in the switch() above.
 	wp_enqueue_script('jquery-ui-core');
 	wp_enqueue_script('jquery-ui-sortable');		
-	wp_enqueue_style('cptr-admin-css', plugin_dir_url( __FILE__ ) . 'cptr-admin.css', true, CPTR_VERSION , 'all' );
-	wp_enqueue_script('cptr-post-edit-scripts', plugin_dir_url( __FILE__ ) . 'post-edit-scripts.js', array( 'jquery' ) );
+	wp_enqueue_style('cptr-admin-css', plugin_dir_url( __FILE__ ) . 'css/cptr-admin.css', true, CPTR_VERSION , 'all' );
+	wp_enqueue_script('cptr-post-edit-scripts', plugin_dir_url( __FILE__ ) . 'js/post-edit-scripts.js', array( 'jquery' ) );
 	wp_localize_script('cptr-post-edit-scripts', 'AjaxHandler', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ) ) );
 }
 
 
 add_action('init', 'cptr_scripts_styles');
-function cptr_scripts_styles() {
-	wp_enqueue_style('cptr-css', plugin_dir_url( __FILE__ ) . 'cptr.css', true, CPTR_VERSION , 'all' );
+function cptr_scripts_styles()
+{
+	wp_enqueue_style('cptr-css', plugin_dir_url( __FILE__ ) . 'css/cptr.css', true, CPTR_VERSION , 'all' );
 }
 
 function cptr_box() {
@@ -112,9 +113,13 @@ function cptr_category_selector() {
 	
 	<div id="cat-selector">
 		<select id="howmany" name="howmany">
-			<option value="10">10</option>
-			<option value="50">50</option>
-			<option value="100">100</option>
+			<?php
+				$howmany = apply_filters('cptr_results_num_per_category', array( 10, 50, 100));
+				foreach($howmany as $val)
+				{
+					?><option value="<?php echo esc_attr($val); ?>"><?php echo $val; ?></option><?php
+				}
+			?>
 			<option value="-1"><?php _ex('All', 'e.g. All items from Posts ordered by Date in Descending order', 'cptr'); ?></option>
 		</select> <?php _ex('items from', 'e.g. All items from Posts ordered by Date in Descending order', 'cptr'); ?> 
 
@@ -139,7 +144,7 @@ function cptr_category_selector() {
 		</select> <?php _ex('order', 'e.g. All items from Posts ordered by Date in Descending order', 'cptr'); ?> &nbsp;
 		&nbsp; <?php _e('Filter:', 'cptr'); ?> <input type="text" id="filtered" name="filtered" />
 		<input type="hidden" id="h_pid" name="h_pid" value="<?php echo $post_ID; ?>" />
-		<input type="button" class="cptr_button button" value="<?php __('Search', 'cptr'); ?>" />
+		<input type="button" class="cptr_button button" value="<?php _e('Search', 'cptr'); ?>" />
 	</div>
 	
 	<div class="postbox">

@@ -15,5 +15,5 @@ function cptr_checkbox_roles( $name = 'cptr_allowed_roles[]', $selected = array(
 	}
 	echo $str;
 }
-
+endif;
 ?>
