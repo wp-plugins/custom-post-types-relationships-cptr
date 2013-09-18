@@ -55,8 +55,14 @@ load_plugin_textdomain('cptr', false, basename(dirname(__FILE__)).'/languages');
 
 // Include deprecated file for compatibility.
 require_once('cpr.php');
+require_once('generic.php');
 
-require_once('panel.php');
+// Not all files should be loaded every time, right?
+global $pagenow;
+if( $pagenow=='options-general.php' and $_GET['page']='ci_cptr_plugin' )
+{
+	require_once('panel.php');
+}
 
 add_action('admin_menu', 'cptr_scripts_admin_styles');
 function cptr_scripts_admin_styles() {
@@ -76,8 +82,8 @@ function cptr_scripts_admin_styles() {
 	wp_enqueue_script('jquery-ui-core');
 	wp_enqueue_script('jquery-ui-sortable');		
 	wp_enqueue_style('cptr-admin-css', plugin_dir_url( __FILE__ ) . 'cptr-admin.css', true, CPTR_VERSION , 'all' );
-	wp_enqueue_script('category-ajax-request', plugin_dir_url( __FILE__ ) . 'cptr.js', array( 'jquery' ) );
-	wp_localize_script('category-ajax-request', 'AjaxHandler', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ) ) );
+	wp_enqueue_script('cptr-post-edit-scripts', plugin_dir_url( __FILE__ ) . 'post-edit-scripts.js', array( 'jquery' ) );
+	wp_localize_script('cptr-post-edit-scripts', 'AjaxHandler', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ) ) );
 }
 
 
