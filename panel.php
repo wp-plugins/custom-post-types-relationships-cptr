@@ -1,4 +1,3 @@
-
 <?php
 // Build the admin panel
 
