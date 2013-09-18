@@ -8,7 +8,6 @@ Tags: related posts, custom related posts, custom relations, post relationships,
 Requires at least: 2.9.0
 Tested up to: 3.6
 Stable tag: 2.4
-Version: 2.4.1
 
 This plugin will let you create custom post relationships among posts, pages and custom post types.
 
