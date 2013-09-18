@@ -3,7 +3,7 @@
 Plugin Name: Custom Post Types Relationships (CPTR)
 Plugin URI: http://www.cssigniter.com/ignite/custom-post-types-relationships/
 Description: An easy way to create relationships between posts, pages, and custom post types in Wordpress
-Version: 2.4
+Version: 2.4.1
 Author: The CSSigniter Team
 Author URI: http://www.cssigniter.com/
 
@@ -31,7 +31,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 //
 
 if (!defined('CPTR_VERSION'))
-	define('CPTR_VERSION', '2.5');
+	define('CPTR_VERSION', '2.4.1');
 
 if (!defined('CI_CPTR_PLUGIN_OPTIONS'))
 	define('CI_CPTR_PLUGIN_OPTIONS', 'ci_cptr_plugin');
