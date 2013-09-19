@@ -1,6 +1,6 @@
 div#cat-selector { margin-bottom:5px; }
 div#available-posts,div#related-posts { height:250px; overflow:auto; padding:4px; }
-div#related-posts div.thepost { cursor:pointer; background: #f1f1f1 url(sortable.png) no-repeat right 10px; }
+div#related-posts div.thepost { cursor:pointer; background: #f1f1f1 url(../img/sortable.png) no-repeat right 10px; }
 div.thepost { overflow:hidden; background:#f1f1f1; border:solid 1px #ededed; margin-bottom:4px; padding:3px; }
 div.thepost p { width:70%; float:left; padding:0 0 0 10px; }
 div.thepost a { float:left; width:100px; display:block; text-align:center; padding:10px 0; color:#fff; text-decoration:none; color:#fff; }
@@ -9,5 +9,9 @@ div.thepost a.addme { background:#679c47; }
 div.thepost a.addme:hover { background:#466f2e; }
 div.thepost a.removeme { background:#ef3737; }
 div.thepost a.removeme:hover { background:#b82e2e; }
+div.thepost a.add_reciprocal { background:#679c47; }
+div.thepost a.add_reciprocal:hover { background:#466f2e; }
+div.thepost a.remove_reciprocal { background:#ef3737; }
+div.thepost a.remove_reciprocal:hover { background:#b82e2e; }
 div.thepost a.added { background:#fb9606; }
 div.thepost a.added:hover { background:#e08c15; }

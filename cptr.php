@@ -59,10 +59,57 @@ require_once('generic.php');
 
 // Not all files should be loaded every time, right?
 global $pagenow;
-if( $pagenow=='options-general.php' and $_GET['page']='ci_cptr_plugin' )
+if( is_admin() and $pagenow=='options-general.php' and $_GET['page']='ci_cptr_plugin' )
 {
 	require_once('panel.php');
 }
+
+if ( is_admin() )
+{
+	add_action('admin_menu', 'ci_cptr_menu');
+	add_action('admin_init', 'register_ci_cptr_settings' );
+	register_activation_hook( __FILE__, 'ci_cptr_activate' );
+	register_deactivation_hook( __FILE__, 'ci_cptr_deactivate' );
+}
+
+function ci_cptr_menu()
+{
+	add_options_page(__('CSSIgniter Custom Post Types Relationships Options', 'cptr'), __('Custom Post Types Relationships', 'cptr'), 'manage_options', CI_CPTR_PLUGIN_OPTIONS, 'ci_cptr_plugin_options');
+}
+
+function register_ci_cptr_settings()
+{
+	register_setting( 'ci_cptr_plugin_settings', CI_CPTR_PLUGIN_OPTIONS, 'ci_cptr_plugin_settings_validate');
+}
+
+function ci_cptr_plugin_settings_validate($settings)
+{
+	$settings['limit'] = intval($settings['limit']) > 0 ? intval($settings['limit']) : CPTR_DEFAULT_LIMIT;
+	$settings['excerpt'] = (isset($settings['excerpt']) and ($settings['excerpt'] == 1) ) ? 1 : 0;
+	$settings['words'] = intval($settings['words']) > 0 ? intval($settings['words']) : CPTR_DEFAULT_EXCERPT_LENGTH;
+	$settings['thumb'] = (isset($settings['thumb']) and ($settings['thumb'] == 1) ) ? 1 : 0;
+	$settings['width'] = intval($settings['width']) > 0 ? intval($settings['width']) : CPTR_DEFAULT_THUMB_WIDTH;
+	$settings['height'] = intval($settings['height']) > 0 ? intval($settings['height']) : CPTR_DEFAULT_THUMB_HEIGHT;
+	return $settings;
+}
+
+function ci_cptr_activate()
+{
+	$options = get_option(CI_CPTR_PLUGIN_OPTIONS);
+	if ( !isset($options['limit']) ) $options['limit'] = CPTR_DEFAULT_LIMIT;
+	if ( !isset($options['excerpt']) ) $options['excerpt'] = CPTR_DEFAULT_EXCERPT;
+	if ( !isset($options['words']) ) $options['words'] = CPTR_DEFAULT_EXCERPT_LENGTH;
+	if ( !isset($options['thumb']) ) $options['thumb'] = CPTR_DEFAULT_THUMB;
+	if ( !isset($options['width']) ) $options['width'] = CPTR_DEFAULT_THUMB_WIDTH;
+	if ( !isset($options['height']) ) $options['height'] = CPTR_DEFAULT_THUMB_HEIGHT;
+	
+	update_option( CI_CPTR_PLUGIN_OPTIONS, $options );
+}
+function ci_cptr_deactivate()
+{
+	unregister_setting( 'ci_cptr_plugin_settings', CI_CPTR_PLUGIN_OPTIONS);
+}
+
 
 add_action('admin_menu', 'cptr_scripts_admin_styles');
 function cptr_scripts_admin_styles() {
@@ -158,16 +205,18 @@ function cptr_category_selector() {
 			if (!empty($relations)) :
 				foreach($relations as $relation) :
 					$post = get_post($relation);
-					echo '<div title="' . $post->post_title . '" class="thepost" id="post-'.$post->ID .'">
-							<a href="#" class="removeme">' . __('Remove', 'cptr') . '</a>
-							<p><strong>' . $post->post_title . '</strong></p>
-							<input type="hidden" name="reladded[]" value="' . $post->ID . '" />
-							</div>';
+					echo '<div title="' . $post->post_title . '" class="thepost" id="post-'.$post->ID .'">'.
+							'<a href="#" class="removeme">' . __('Remove', 'cptr') . '</a>'.
+							'<p><strong>' . $post->post_title . '</strong></p>'.
+							'<a href="#" class="add_reciprocal">' . __('Add reciprocal', 'cptr') . '</a>'.
+							//'<a href="#" class="remove_reciprocal">' . __('Remove reciprocal', 'cptr') . '</a>'.
+							'<input type="hidden" name="reladded[]" value="' . $post->ID . '" />'.
+							'</div>';
 				endforeach;	
 			endif;
 			?>
 			
-			<input type="hidden" name="myplugin_noncename" id="myplugin_noncename" value="<?php echo wp_create_nonce( plugin_basename(__FILE__) ); ?>" />
+			<input type="hidden" name="cptr_noncename" id="cptr_noncename" value="<?php echo wp_create_nonce( plugin_basename(__FILE__) ); ?>" />
 		</div>
 	</div>
 
@@ -215,8 +264,8 @@ function cptr_save() {
 	global $post_ID;
 
 	if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) return;
-	if (!isset($_POST['myplugin_noncename'])) return;
-	if (!wp_verify_nonce( $_POST['myplugin_noncename'], plugin_basename(__FILE__))) return;
+	if (!isset($_POST['cptr_noncename'])) return;
+	if (!wp_verify_nonce( $_POST['cptr_noncename'], plugin_basename(__FILE__))) return;
 	if (!current_user_can( 'edit_post', $post_ID ) ) return;
 
 	$id = $_POST['post_ID'];
