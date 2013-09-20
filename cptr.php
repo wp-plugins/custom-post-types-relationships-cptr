@@ -2,7 +2,7 @@
 /*
 Plugin Name: Custom Post Types Relationships (CPTR)
 Plugin URI: http://www.cssigniter.com/ignite/custom-post-types-relationships/
-Description: An easy way to create relationships between posts, pages, and custom post types in Wordpress
+Description: An easy way to create relationships between posts, pages, and custom post types in WordPress
 Version: 2.4.1
 Author: The CSSigniter Team
 Author URI: http://www.cssigniter.com/
@@ -49,7 +49,7 @@ define('CPTR_DEFAULT_EXCERPT', 0); // 0 is false, 1 is true
 define('CPTR_DEFAULT_EXCERPT_LENGTH', 55); 
 define('CPTR_DEFAULT_THUMB', 0); // 0 is false, 1 is true
 define('CPTR_DEFAULT_THUMB_WIDTH', 100); 
-define('CPTR_DEFAULT_THUMB_HEIGHT', 100); 
+define('CPTR_DEFAULT_THUMB_HEIGHT', 100);
 
 load_plugin_textdomain('cptr', false, basename(dirname(__FILE__)).'/languages');
 
@@ -59,7 +59,7 @@ require_once('generic.php');
 
 // Not all files should be loaded every time, right?
 global $pagenow;
-if( is_admin() and $pagenow=='options-general.php' and $_GET['page']='ci_cptr_plugin' )
+if( is_admin() and $pagenow=='options-general.php' and !empty($_GET['page']) and $_GET['page']=='ci_cptr_plugin' )
 {
 	require_once('panel.php');
 }
@@ -90,6 +90,9 @@ function ci_cptr_plugin_settings_validate($settings)
 	$settings['thumb'] = (isset($settings['thumb']) and ($settings['thumb'] == 1) ) ? 1 : 0;
 	$settings['width'] = intval($settings['width']) > 0 ? intval($settings['width']) : CPTR_DEFAULT_THUMB_WIDTH;
 	$settings['height'] = intval($settings['height']) > 0 ? intval($settings['height']) : CPTR_DEFAULT_THUMB_HEIGHT;
+	$settings['allowed_roles'] = (!empty($settings['allowed_roles']) and is_array($settings['allowed_roles'])) ? (array)$settings['allowed_roles'] : array();
+	$settings['allowed_post_types'] = (!empty($settings['allowed_post_types']) and is_array($settings['allowed_post_types'])) ? (array)$settings['allowed_post_types'] : array();
+	$settings['metabox_name'] = !empty($settings['metabox_name']) ? $settings['metabox_name'] : __('Custom Post Types Relationships (CPTR)', 'cptr');
 	return $settings;
 }
 
@@ -102,9 +105,13 @@ function ci_cptr_activate()
 	if ( !isset($options['thumb']) ) $options['thumb'] = CPTR_DEFAULT_THUMB;
 	if ( !isset($options['width']) ) $options['width'] = CPTR_DEFAULT_THUMB_WIDTH;
 	if ( !isset($options['height']) ) $options['height'] = CPTR_DEFAULT_THUMB_HEIGHT;
-	
+	if ( !isset($options['allowed_roles']) ) $options['allowed_roles'] = array('administrator');
+	if ( !isset($options['allowed_post_types']) ) $options['allowed_post_types'] = _cptr_get_default_post_types();
+	if ( !isset($options['metabox_name']) ) $options['metabox_name'] = __('Custom Post Types Relationships (CPTR)', 'cptr');
+
 	update_option( CI_CPTR_PLUGIN_OPTIONS, $options );
 }
+
 function ci_cptr_deactivate()
 {
 	unregister_setting( 'ci_cptr_plugin_settings', CI_CPTR_PLUGIN_OPTIONS);
@@ -114,23 +121,30 @@ function ci_cptr_deactivate()
 add_action('admin_menu', 'cptr_scripts_admin_styles');
 function cptr_scripts_admin_styles() {
 	global $pagenow;
+
+
+	if( is_admin() and $pagenow=='options-general.php' and $_GET['page']='ci_cptr_plugin' )
+	{
+		wp_enqueue_style('cptr-admin-css', plugin_dir_url( __FILE__ ) . 'css/admin.css', true, CPTR_VERSION , 'all' );
+	}
+
 	switch($pagenow)
 	{
 		case 'post.php':
 		case 'post-new.php':
 		case 'page.php':
 		case 'page-new.php':
+			wp_enqueue_script('jquery-ui-core');
+			wp_enqueue_script('jquery-ui-sortable');		
+			wp_enqueue_style('cptr-post-edit', plugin_dir_url( __FILE__ ) . 'css/post-edit.css', true, CPTR_VERSION , 'all' );
+			wp_enqueue_script('cptr-post-edit-scripts', plugin_dir_url( __FILE__ ) . 'js/post-edit-scripts.js', array( 'jquery' ) );
+			wp_localize_script('cptr-post-edit-scripts', 'AjaxHandler', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ) ) );
 			break;
 		default:
-			return;
+			break;
 	}
 	
-	// Execution reaches this point only if it's one of the defined pages in the switch() above.
-	wp_enqueue_script('jquery-ui-core');
-	wp_enqueue_script('jquery-ui-sortable');		
-	wp_enqueue_style('cptr-admin-css', plugin_dir_url( __FILE__ ) . 'css/cptr-admin.css', true, CPTR_VERSION , 'all' );
-	wp_enqueue_script('cptr-post-edit-scripts', plugin_dir_url( __FILE__ ) . 'js/post-edit-scripts.js', array( 'jquery' ) );
-	wp_localize_script('cptr-post-edit-scripts', 'AjaxHandler', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ) ) );
+
 }
 
 
@@ -142,20 +156,32 @@ function cptr_scripts_styles()
 
 function cptr_box() {
 
-	$cptr_post_types = _cptr_get_post_types();
-	
-	foreach ($cptr_post_types as $key=>$value)
+	$options = get_option( CI_CPTR_PLUGIN_OPTIONS );
+
+	if( !cptr_user_should_see_metabox($options) )
+		return;
+
+
+	foreach ($options['allowed_post_types'] as $type)
 	{
-		add_meta_box( 'post-meta-boxes', __('Custom Post Types Relationships (CPTR)', 'cptr'), 'cptr_category_selector', $key, 'normal','default' );
+		add_meta_box( 'post-meta-boxes', $options['metabox_name'], 'cptr_category_selector', $type, 'normal', 'default' );
 	}
+
+
+	//$cptr_post_types = _cptr_get_post_types();
+	//
+	//foreach ($cptr_post_types as $key=>$value)
+	//{
+	//	add_meta_box( 'post-meta-boxes', $options['metabox_name'], 'cptr_category_selector', $key, 'normal', 'default' );
+	//}
 }
 
-function cptr_category_selector() {
+function cptr_category_selector()
+{
 	
 	global $post_ID;
 
-	$cptr_post_types = _cptr_get_post_types();
-	
+	$cptr_post_types = _cptr_get_selected_post_types();
 	?>
 	
 	<div id="cat-selector">
@@ -171,11 +197,11 @@ function cptr_category_selector() {
 		</select> <?php _ex('items from', 'e.g. All items from Posts ordered by Date in Descending order', 'cptr'); ?> 
 
 		<select id="posttype" name="cptr_post_type">
-	 	<?php foreach($cptr_post_types as $key=>$type): ?>
-			<option value="<?php echo esc_attr($key); ?>">
-				<?php echo $type->labels->name; ?>
-			</option>
-		<?php endforeach; ?>
+			<?php foreach($cptr_post_types as $key=>$type): ?>
+				<option value="<?php echo esc_attr($key); ?>">
+					<?php echo $type->labels->name; ?>
+				</option>
+			<?php endforeach; ?>
 		</select>
 		
 		<?php _ex('ordered by', 'e.g. All items from Posts ordered by Date in Descending order', 'cptr'); ?> 
@@ -208,8 +234,8 @@ function cptr_category_selector() {
 					echo '<div title="' . $post->post_title . '" class="thepost" id="post-'.$post->ID .'">'.
 							'<a href="#" class="removeme">' . __('Remove', 'cptr') . '</a>'.
 							'<p><strong>' . $post->post_title . '</strong></p>'.
-							'<a href="#" class="add_reciprocal">' . __('Add reciprocal', 'cptr') . '</a>'.
-							//'<a href="#" class="remove_reciprocal">' . __('Remove reciprocal', 'cptr') . '</a>'.
+							//'<a href="#" class="add_reciprocal">' . __('Add <->', 'cptr') . '</a>'.
+							//'<a href="#" class="remove_reciprocal">' . __('Remove <->', 'cptr') . '</a>'.
 							'<input type="hidden" name="reladded[]" value="' . $post->ID . '" />'.
 							'</div>';
 				endforeach;	
@@ -224,38 +250,45 @@ function cptr_category_selector() {
 } 
 
 // Where's Dukey? Wa zaaaaaaaaaaaa (the call)
-function cptr_cats() {
+function cptr_cats()
+{
 	$post_type   = $_POST['cptr_post_type'];
 	$postID  = $_POST['postID'];
 	$howMany = $_POST['howMany'];
 	$orderBy = $_POST['orderBy'];
 	$orderIn = $_POST['orderIn'];
+	$filter = $_POST['filtered'];
 
- 		$args = array(
- 			'post_type' => $post_type,
- 			'numberposts' => $howMany,
- 			'post_status' => 'publish',
- 			'orderby' => $orderBy,
- 			'order' => $orderIn,
- 			'post__not_in' => array($postID)
- 		);
+	$args = array(
+		'post_type' => $post_type,
+		'numberposts' => $howMany,
+		'post_status' => 'publish',
+		'orderby' => $orderBy,
+		'order' => $orderIn,
+		'post__not_in' => array($postID)
+	);
 
- 		$posts = get_posts($args);
-			
-		if (!empty($posts)) {
-			foreach ( $posts as $post ) {
-				setup_postdata($post);
-				echo "<div title='" . $post->post_title . "' class='thepost' id='post-".$post->ID ."'>
-					<a href='#' class='addme'>Add</a>
-					<p><strong>" . $post->post_title . "</strong></p>
-					<input type='hidden' name='related[]' value='" . $post->ID . "' />
-					</div>";
-			}
+	if(!empty($filter))
+	{
+		$args['s'] = $filter;
+	}
+
+	$posts = get_posts($args);
+		
+	if (!empty($posts)) {
+		foreach ( $posts as $post ) {
+			setup_postdata($post);
+			echo "<div title='" . $post->post_title . "' class='thepost' id='post-".$post->ID ."'>
+				<a href='#' class='addme'>Add</a>
+				<p><strong>" . $post->post_title . "</strong></p>
+				<input type='hidden' name='related[]' value='" . $post->ID . "' />
+				</div>";
 		}
-		else 
-		{
-			echo '<div class="thepost">This category is empty</div>'; 
-		}
+	}
+	else 
+	{
+		echo '<div class="thepost">' . __('This category is empty', 'cptr') . '</div>'; 
+	}
 	
 	exit;
 }
@@ -503,59 +536,9 @@ function cptr_uninstall()
 {
 	global $wpdb;	
 	$wpdb->query($wpdb->prepare("DELETE FROM $wpdb->postmeta WHERE meta_key = '".CI_CPTR_POST_RELATED."'"));
+	delete_option( CI_CPTR_PLUGIN_OPTIONS );
 }
 
-function _cptr_get_post_types()
-{
-	// Get the post types available
-	$types = array();
-	$types = get_post_types($args = array(
-		'public'   => true
-	), 'objects');
-
-	unset($types['attachment']);
-	return $types;
-}
-
-function _create_excerpt($text, $length=55)
-{
-	$the_excerpt = $text;
-	$the_excerpt = strip_shortcodes($the_excerpt);
-	$the_excerpt = str_replace(']]>', ']]&gt;', $the_excerpt);
-	$the_excerpt = strip_tags($the_excerpt);
-	$words_arr = preg_split("/[\n\r\t ]+/", $the_excerpt, $length+1, PREG_SPLIT_NO_EMPTY);
-	if ( count($words_arr) > $length ) {
-		array_pop($words_arr);
-	}
-	$the_excerpt = implode(' ', $words_arr);
-	return $the_excerpt . '...';
-}
-
-/**
- * Marks a function as deprecated and informs when it has been used.
- *
- * The current behavior is to trigger a user error if WP_DEBUG is true.
- *
- * This function is to be used in every function that is deprecated.
- *
- * @param string $function The function that was called
- * @param string $version The version of the plugin that deprecated the function
- * @param string $replacement Optional. The function that should have been called. Empty means there is no replacement available.
- */
-function _cptr_deprecated_function( $function, $version, $replacement=null ) {
-	if ( WP_DEBUG ) {
-		if ( ! is_null($replacement) )
-			trigger_error( sprintf( __('Function %1$s is <strong>deprecated</strong> since CPTR version %2$s! Use %3$s instead.'), $function, $version, $replacement ) );
-		else
-			trigger_error( sprintf( __('Function %1$s is <strong>deprecated</strong> since CPTR version %2$s with no alternative available.'), $function, $version ) );
-	}
-}
-
-function _cptr_deprecated_parameters( $function, $version ) {
-	if ( WP_DEBUG ) {
-		trigger_error( sprintf( __('The signature of the function %1$s has changed and the current usage has been <strong>deprecated</strong> since CPTR version %2$s. Please consult the documentation for up to date usage instructions.'), $function, $version ) );
-	}
-}
 
 
 

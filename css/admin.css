@@ -1,0 +1,6 @@
+/* CPTR settings */
+#cptr-options .allowed-roles label,
+#cptr-options .allowed-post-types label { display: block; }
+
+#cptr-options .allowed-roles label input,
+#cptr-options .allowed-post-types label input { margin-right: 5px; margin-top: 0px; }

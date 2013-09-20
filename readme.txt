@@ -38,7 +38,13 @@ Check http://www.cssigniter.com/ignite/custom-post-relationships/ for info on ho
 = 2.4.1 = 
 * Made all text translatable.
 * Wrapped all HTML properties in double quotes instead of single.
-* Moved js and css files into folders.
+* Moved image, js and css files into folders.
+* "Filter" field now has two uses. As a search term when loading results, and once loaded, filtering current results by title.
+* Added ability to use the plugin by user-selectable roles.
+* Added ability to use the plugin in user-selectable post-types.
+* Metabox title is now customizable through the options.
+* Number of results dropdown (in post edit screens) is now filterable with 'cptr_results_num_per_category'
+
 
 = 2.4 = 
 * Fixed a bug where the normal post object was not restored after the execution of cptr_category_selector(), when selecting related posts. (Thanks Pascal Rosin).

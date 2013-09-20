@@ -25,7 +25,15 @@ jQuery(document).ready(function($) {
 		$.ajax({
 			type: "post",
 			url: AjaxHandler.ajaxurl,
-			data: { action: 'cptr-cats', cptr_post_type: $('#posttype').val(), postID: $('#h_pid').val(), howMany: $('#howmany').val(), orderBy: $('#orderby').val(), orderIn: $('#orderin').val()  },
+			data: {
+				action: 'cptr-cats',
+				cptr_post_type: $('#posttype').val(),
+				postID: $('#h_pid').val(),
+				howMany: $('#howmany').val(),
+				orderBy: $('#orderby').val(),
+				orderIn: $('#orderin').val(),
+				filtered: $('#filtered').val(),
+			},
 			beforeSend: function() {$("#available-posts").html('Loading...');}, 
 			success: function(response){ 
 				//dump the list with post from the category selected
