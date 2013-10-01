@@ -138,7 +138,15 @@ function cptr_scripts_admin_styles() {
 			wp_enqueue_script('jquery-ui-sortable');		
 			wp_enqueue_style('cptr-post-edit', plugin_dir_url( __FILE__ ) . 'css/post-edit.css', true, CPTR_VERSION , 'all' );
 			wp_enqueue_script('cptr-post-edit-scripts', plugin_dir_url( __FILE__ ) . 'js/post-edit-scripts.js', array( 'jquery' ) );
-			wp_localize_script('cptr-post-edit-scripts', 'AjaxHandler', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ) ) );
+
+			$settings = array(
+				'ajaxurl' => admin_url( 'admin-ajax.php' ),
+				'btn_Add_text' => _x('Add', '"Add" button text', 'cptr'),
+				'btn_Added_text' => _x('Added', '"Added" button text', 'cptr'),
+				'btn_Remove_text' => _x('Remove', '"Remove" button text', 'cptr'),
+				'duplicate_post_text' => __('This post is already in your list', 'cptr')
+			);
+			wp_localize_script('cptr-post-edit-scripts', 'cptrSettings', $settings );
 			break;
 		default:
 			break;
@@ -164,7 +172,7 @@ function cptr_box() {
 
 	foreach ($options['allowed_post_types'] as $type)
 	{
-		add_meta_box( 'post-meta-boxes', $options['metabox_name'], 'cptr_category_selector', $type, 'normal', 'default' );
+		add_meta_box( 'cptr-meta-box', $options['metabox_name'], 'cptr_category_selector', $type, 'normal', 'default' );
 	}
 
 

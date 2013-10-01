@@ -19,12 +19,12 @@ jQuery(document).ready(function($) {
 	})
 	
 	// fetch posts per category selected
-	$('.cptr_button').click(function(){ 
+	$('#cptr-meta-box .cptr_button').click(function(){ 
 			
 		// make the call (Yo, Wazzzaaaaaa?)
 		$.ajax({
 			type: "post",
-			url: AjaxHandler.ajaxurl,
+			url: cptrSettings.ajaxurl,
 			data: {
 				action: 'cptr-cats',
 				cptr_post_type: $('#posttype').val(),
@@ -47,15 +47,18 @@ jQuery(document).ready(function($) {
 				$($duplicates).find('a')
 					.removeClass('addme')
 					.addClass('added')
-					.html('Added');
-													
+					.html(cptrSettings.btn_Added_text);
+
 			}//success	
 		});//ajax		
 		
 	}); //change
 			
 	// clone items (avoid duplicates as well)
-	$('.addme').live('click', function() {
+	$('#cptr-meta-box').on('click', '.addme', function(e) {
+
+		e.preventDefault();
+
 		var post = $(this).parents('div.thepost');
 		var postId = post.attr("id");
 
@@ -66,7 +69,7 @@ jQuery(document).ready(function($) {
 			.fadeIn('normal')
 			.appendTo('#related-posts')
 			.find('a.addme')
-			.html('Remove')
+			.html(cptrSettings.btn_Remove_text)
 			.removeClass('addme')
 			.addClass('removeme')
 			.siblings('input')
@@ -74,13 +77,16 @@ jQuery(document).ready(function($) {
 
 		$(this).removeClass('addme')
 			.addClass('added')
-			.html('Added');
+			.html(cptrSettings.btn_Added_text);
 		
 		return false;
 	});	
 	
 	// remove items
-	$('.removeme').live('click', function() {
+	$('#cptr-meta-box').on('click', '.removeme', function(e) {
+
+		e.preventDefault();
+
 		var post = $(this).parents('div.thepost');
 		var postId = post.attr("id");
 		post.fadeOut('normal', function() { 
@@ -90,15 +96,17 @@ jQuery(document).ready(function($) {
 		$('#available-posts div#' + postId).find('a')
 			.removeClass('added')
 			.addClass('addme')
-			.html('Add');
+			.html(cptrSettings.btn_Add_text);
 			
 		return false;
 	});
 
 	// oh well, people do click a lot
-	$('.added').live('click', function() {
-		alert('This post is already in your list');
-		return false;
+	$('#cptr-meta-box').on('click', '.added', function(e) {
+
+		e.preventDefault();
+
+		alert(cptrSettings.duplicate_post_text);
 	});
 	
 	
