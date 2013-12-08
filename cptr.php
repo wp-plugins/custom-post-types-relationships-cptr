@@ -123,7 +123,7 @@ function cptr_scripts_admin_styles() {
 	global $pagenow;
 
 
-	if( is_admin() and $pagenow=='options-general.php' and $_GET['page']='ci_cptr_plugin' )
+	if( is_admin() and $pagenow=='options-general.php' and $_GET['page']=='ci_cptr_plugin' )
 	{
 		wp_enqueue_style('cptr-admin-css', plugin_dir_url( __FILE__ ) . 'css/admin.css', true, CPTR_VERSION , 'all' );
 	}
