@@ -50,6 +50,8 @@ function cptr_user_should_see_metabox($options = false)
 		$options = get_option( CI_CPTR_PLUGIN_OPTIONS );
 	}
 
+	$options['allowed_roles'] = empty($options['allowed_roles']) ? array() : $options['allowed_roles'];
+
 	$cur_user = wp_get_current_user();
 
 	// Check that at least one of the allowed roles, is also assigned to the user.

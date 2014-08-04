@@ -3,8 +3,8 @@
 Plugin Name: Custom Post Types Relationships (CPTR)
 Plugin URI: http://www.cssigniter.com/ignite/custom-post-types-relationships/
 Description: An easy way to create relationships between posts, pages, and custom post types in WordPress
-Version: 2.4.1
-Author: The CSSigniter Team
+Version: 3.0
+Author: The CSSIgniter Team
 Author URI: http://www.cssigniter.com/
 
 
@@ -31,7 +31,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 //
 
 if (!defined('CPTR_VERSION'))
-	define('CPTR_VERSION', '2.4.1');
+	define('CPTR_VERSION', '3.0');
 
 if (!defined('CI_CPTR_PLUGIN_OPTIONS'))
 	define('CI_CPTR_PLUGIN_OPTIONS', 'ci_cptr_plugin');
@@ -41,7 +41,10 @@ if (!defined('CI_CPTR_PLUGIN_INSTALLED'))
 	
 if (!defined('CI_CPTR_POST_RELATED'))
 	define('CI_CPTR_POST_RELATED', 'cptr_related');
-	
+
+if(!defined('CI_CPTR_BASENAME'))
+	define('CI_CPTR_BASENAME', plugin_basename(__FILE__));
+
 	
 // Set defaults
 define('CPTR_DEFAULT_LIMIT', 0);
@@ -439,13 +442,13 @@ function cptr_show(	$echo=true,
 // This function should be removed by version 3.0
 // Don't use this function!
 function _old_cptr_show( $echo=true, 
-					$limit=CPTR_DEFAULT_LIMIT, 
-					$excerpt=CPTR_DEFAULT_EXCERPT, 
-					$words=CPTR_DEFAULT_EXCERPT_LENGTH, 
-					$thumb=CPTR_DEFAULT_THUMB, 
-					$width=CPTR_DEFAULT_THUMB_WIDTH,
-					$height=CPTR_DEFAULT_THUMB_HEIGHT,
-					$output_order=null) {
+		$limit=CPTR_DEFAULT_LIMIT,
+		$excerpt=CPTR_DEFAULT_EXCERPT,
+		$words=CPTR_DEFAULT_EXCERPT_LENGTH,
+		$thumb=CPTR_DEFAULT_THUMB,
+		$width=CPTR_DEFAULT_THUMB_WIDTH,
+		$height=CPTR_DEFAULT_THUMB_HEIGHT,
+		$output_order=null) {
 
 	global $post, $wpdb;
 
@@ -539,15 +542,33 @@ function ci_cptr_short($atts) {
 	return cptr_show($p);
 }
 
+
+add_filter('plugin_action_links_'.CI_CPTR_BASENAME, 'ci_cptr_plugin_action_links');
+if( !function_exists('ci_cptr_plugin_action_links') ):
+function ci_cptr_plugin_action_links($links) {
+	$url = admin_url( 'options-general.php?page=ci_cptr_plugin' );
+	array_unshift( $links, '<a href="' . esc_url( $url ) . '">' . __( 'Settings', 'cisiw' ) . '</a>' );
+	return $links;
+}
+endif;
+
+add_action('in_plugin_update_message-'.CI_CPTR_BASENAME, 'ci_cptr_plugin_update_message', 10, 2);
+if( !function_exists('ci_cptr_plugin_update_message') ):
+function ci_cptr_plugin_update_message($plugin_data, $r) {
+	if ( !empty( $r->upgrade_notice ) ) {
+		printf( '<p style="margin: 3px 0 0 0; border-top: 1px solid #ddd; padding-top: 3px">%s</p>', $r->upgrade_notice );
+	}
+}
+endif;
+
+
 // oi! wait! where are you going? are you sure? 100%? a second thought? come on let's talk about it. oh well.
 function cptr_uninstall()
 {
 	global $wpdb;	
-	$wpdb->query($wpdb->prepare("DELETE FROM $wpdb->postmeta WHERE meta_key = '".CI_CPTR_POST_RELATED."'"));
+	$wpdb->query($wpdb->prepare("DELETE FROM $wpdb->postmeta WHERE meta_key = %s", CI_CPTR_POST_RELATED));
 	delete_option( CI_CPTR_PLUGIN_OPTIONS );
 }
-
-
 
 
 //
@@ -601,8 +622,12 @@ function _cptr_upgrade_to_2_2($version)
 	
 	// Update the posts
 	$meta_name = defined(CI_CPR_POST_RELATED) ? CI_CPR_POST_RELATED : 'cpr_related';
-	global $wpdb;	
-	$wpdb->query($wpdb->prepare("UPDATE $wpdb->postmeta SET meta_key = '".CI_CPTR_POST_RELATED."' WHERE meta_key = '".$meta_name."'"));
+	global $wpdb;
+	$query = "UPDATE $wpdb->postmeta SET meta_key = %s WHERE meta_key = %s";
+	$wpdb->query( $wpdb->prepare( $query,
+		CI_CPTR_POST_RELATED,
+		$meta_name
+	) );
 	
 	return '2.2';
 }
