@@ -3,12 +3,11 @@ Contributors: tsiger, anastis
 Plugin Name: Custom Post Types Relationships (CPTR)
 Plugin URI: http://www.cssigniter.com/ignite/custom-post-types-relationships/
 Author URI: http://www.cssigniter.com/
-Author: The CSSigniter Team
+Author: The CSSIgniter Team
 Tags: related posts, custom related posts, custom relations, post relationships, related, post
-Requires at least: 2.9.0
-Tested up to: 3.3.1
+Requires at least: 3.8
+Tested up to: 3.9.1
 Stable tag: 2.4
-Version: 2.4
 
 This plugin will let you create custom post relationships among posts, pages and custom post types.
 
@@ -36,7 +35,11 @@ Check http://www.cssigniter.com/ignite/custom-post-relationships/ for info on ho
 
 == Changelog ==
 
-= 2.4 = 
+= 2.4.1 =
+* Added a "Settings" link into the plugins' listing page.
+* The plugin's Upgrade Notice, if available, is now shown into the plugins listing page.
+
+= 2.4 =
 * Fixed a bug where the normal post object was not restored after the execution of cptr_category_selector(), when selecting related posts. (Thanks Pascal Rosin).
 
 = 2.3 = 
